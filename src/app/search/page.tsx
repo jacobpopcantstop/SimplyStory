@@ -29,7 +29,7 @@ export default async function SearchPage({
 }: {
   searchParams: { q?: string };
 }) {
-  const query = searchParams.q?.trim() || "";
+  const query = (searchParams.q?.trim() || "").slice(0, 200);
   const stories = query ? await searchStories(query) : [];
 
   return (
@@ -46,6 +46,7 @@ export default async function SearchPage({
             defaultValue={query}
             placeholder="Search stories..."
             className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder-gray-500"
+            maxLength={200}
             autoFocus
           />
           <button

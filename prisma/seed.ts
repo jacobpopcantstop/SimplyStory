@@ -108,7 +108,7 @@ async function main() {
         rssFeeds: source.rssFeeds,
         bias: source.bias,
         country: source.country || "US",
-        logoUrl: source.logoUrl || `https://www.google.com/s2/favicons?domain=${source.domain}&sz=64`,
+        logoUrl: source.logoUrl || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(source.domain)}&sz=64`,
       },
     });
   }

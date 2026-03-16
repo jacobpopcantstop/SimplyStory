@@ -61,6 +61,7 @@ model Article {
   @@index([sourceId])
   @@index([publishedAt])
   @@index([status])
+  @@index([status, publishedAt])
 }
 
 model StoryCluster {
@@ -77,6 +78,7 @@ model StoryCluster {
 
   @@index([topicId])
   @@index([createdAt])
+  @@index([isActive, createdAt])
 }
 
 model StoryArticle {

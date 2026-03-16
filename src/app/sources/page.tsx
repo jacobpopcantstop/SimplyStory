@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { BIAS_LABELS, BIAS_COLORS, BIAS_ORDER } from "@/lib/bias/ratings";
+import { getFaviconUrl } from "@/lib/favicon";
 import { BiasRating } from "@prisma/client";
 
 export const revalidate = 3600;
@@ -48,7 +49,7 @@ export default async function SourcesPage() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={source.logoUrl || `https://www.google.com/s2/favicons?domain=${source.domain}&sz=32`}
+                    src={source.logoUrl || getFaviconUrl(source.domain)}
                     alt={source.name}
                     className="h-8 w-8 rounded"
                   />

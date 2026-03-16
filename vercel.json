@@ -6,6 +6,10 @@
       "schedule": "0 */2 * * *"
     },
     {
+      "path": "/api/cron/extract-articles",
+      "schedule": "15 */2 * * *"
+    },
+    {
       "path": "/api/cron/cluster-stories",
       "schedule": "30 */2 * * *"
     }

@@ -27,11 +27,10 @@ export async function pollSource(sourceId: string): Promise<number> {
         // Normalize URL
         const url = item.link.split("?")[0]; // strip tracking params
 
-        const existing = await prisma.article.findUnique({ where: { url } });
-        if (existing) continue;
-
-        await prisma.article.create({
-          data: {
+        const result = await prisma.article.upsert({
+          where: { url },
+          update: {},
+          create: {
             url,
             title: item.title.trim(),
             description: item.contentSnippet?.slice(0, 500) || null,
@@ -41,7 +40,10 @@ export async function pollSource(sourceId: string): Promise<number> {
           },
         });
 
-        newArticles++;
+        // If createdAt is within last 5 seconds, it was just created
+        if (Date.now() - result.createdAt.getTime() < 5000) {
+          newArticles++;
+        }
       }
     } catch (err) {
       console.error(`[RSS] Failed to poll feed ${feedUrl}:`, err);
@@ -59,10 +61,26 @@ export async function pollAllSources(): Promise<void> {
 
   console.log(`[RSS] Polling ${sources.length} sources...`);
 
-  for (const source of sources) {
-    const count = await pollSource(source.id);
-    if (count > 0) {
-      console.log(`[RSS] ${source.name}: +${count} new articles`);
+  // Poll in parallel batches of 10 to avoid overwhelming connections
+  const BATCH_SIZE = 10;
+  let totalNew = 0;
+
+  for (let i = 0; i < sources.length; i += BATCH_SIZE) {
+    const batch = sources.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map(async (source) => {
+        const count = await pollSource(source.id);
+        if (count > 0) {
+          console.log(`[RSS] ${source.name}: +${count} new articles`);
+        }
+        return count;
+      })
+    );
+
+    for (const result of results) {
+      if (result.status === "fulfilled") totalNew += result.value;
     }
   }
+
+  console.log(`[RSS] Done. ${totalNew} new articles total.`);
 }

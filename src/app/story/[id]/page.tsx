@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { BiasMeter, SourceBadge } from "@/components/bias-meter";
 import { getBiasCoverage, hasBlindSpot } from "@/lib/bias/ratings";
+import { getFaviconUrl } from "@/lib/favicon";
 
 export const revalidate = 300;
 
@@ -88,7 +89,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={article.source.logoUrl || `https://www.google.com/s2/favicons?domain=${article.source.domain}`}
+                  src={article.source.logoUrl || getFaviconUrl(article.source.domain)}
                   alt={article.source.name}
                   className="h-4 w-4 rounded-sm"
                 />

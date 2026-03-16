@@ -65,7 +65,7 @@ export const storiesRouter = createTRPCRouter({
     }),
 
   search: publicProcedure
-    .input(z.object({ query: z.string().min(1) }))
+    .input(z.object({ query: z.string().min(1).max(200) }))
     .query(async ({ input }) => {
       return prisma.storyCluster.findMany({
         where: {

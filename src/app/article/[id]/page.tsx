@@ -3,44 +3,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { prisma } from "@/lib/prisma";
-import { extractArticle } from "@/lib/extraction/extractor";
 import { SourceBadge } from "@/components/bias-meter";
+import { getFaviconUrl } from "@/lib/favicon";
 
 export const dynamic = "force-dynamic";
 
 async function getArticle(id: string) {
-  const article = await prisma.article.findUnique({
+  return prisma.article.findUnique({
     where: { id },
     include: { source: true },
   });
-
-  if (!article) return null;
-
-  if (article.status === "PENDING") {
-    try {
-      const extracted = await extractArticle(article.url);
-      return prisma.article.update({
-        where: { id },
-        data: {
-          extractedText: extracted.content,
-          extractedImage: extracted.image,
-          author: extracted.author || article.author,
-          readingTimeMin: extracted.readingTime,
-          status: "EXTRACTED",
-        },
-        include: { source: true },
-      });
-    } catch (err) {
-      const isPaywalled = err instanceof Error && err.message === "PAYWALLED";
-      return prisma.article.update({
-        where: { id },
-        data: { status: isPaywalled ? "PAYWALLED" : "FAILED" },
-        include: { source: true },
-      });
-    }
-  }
-
-  return article;
 }
 
 export default async function ArticlePage({ params }: { params: { id: string } }) {
@@ -63,7 +35,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
       <div className="flex items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={article.source.logoUrl || `https://www.google.com/s2/favicons?domain=${article.source.domain}&sz=32`}
+          src={article.source.logoUrl || getFaviconUrl(article.source.domain)}
           alt={article.source.name}
           className="h-6 w-6 rounded"
         />
@@ -97,7 +69,21 @@ export default async function ArticlePage({ params }: { params: { id: string } }
       )}
 
       {/* Content */}
-      {article.status === "PAYWALLED" ? (
+      {article.status === "PENDING" ? (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center dark:border-blue-800 dark:bg-blue-900/20">
+          <p className="font-medium text-blue-700 dark:text-blue-400">
+            This article hasn&apos;t been extracted yet.
+          </p>
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            Read on {article.source.name} ↗
+          </a>
+        </div>
+      ) : article.status === "PAYWALLED" ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800 dark:bg-amber-900/20">
           <p className="font-medium text-amber-700 dark:text-amber-400">
             🔒 This article is behind a paywall
