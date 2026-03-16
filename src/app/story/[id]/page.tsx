@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { BiasMeter, SourceBadge } from "@/components/bias-meter";
@@ -28,9 +29,7 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
   const coverage = getBiasCoverage(articles);
   const blindSpot = hasBlindSpot(articles);
 
-  const imageUrl = story.imageUrl
-    ? `/api/image-proxy?url=${encodeURIComponent(story.imageUrl)}&w=1200&q=85`
-    : null;
+  const imageUrl = story.imageUrl || null;
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -54,9 +53,8 @@ export default async function StoryPage({ params }: { params: { id: string } }) 
         </h1>
 
         {imageUrl && (
-          <div className="overflow-hidden rounded-xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageUrl} alt={story.title} className="w-full object-cover" />
+          <div className="relative aspect-video overflow-hidden rounded-xl">
+            <Image src={imageUrl} alt={story.title} fill sizes="768px" className="object-cover" />
           </div>
         )}
 

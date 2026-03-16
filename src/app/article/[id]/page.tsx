@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { prisma } from "@/lib/prisma";
 import { extractArticle } from "@/lib/extraction/extractor";
@@ -46,9 +47,7 @@ export default async function ArticlePage({ params }: { params: { id: string } }
   const article = await getArticle(params.id);
   if (!article) notFound();
 
-  const imageUrl = article.extractedImage
-    ? `/api/image-proxy?url=${encodeURIComponent(article.extractedImage)}&w=900&q=85`
-    : null;
+  const imageUrl = article.extractedImage || null;
 
   return (
     <article className="mx-auto max-w-2xl space-y-8">
@@ -87,9 +86,8 @@ export default async function ArticlePage({ params }: { params: { id: string } }
 
       {/* Hero image */}
       {imageUrl && (
-        <div className="overflow-hidden rounded-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageUrl} alt={article.imageAlt || article.title} className="w-full" />
+        <div className="relative aspect-video overflow-hidden rounded-xl">
+          <Image src={imageUrl} alt={article.imageAlt || article.title} fill sizes="672px" className="object-cover" />
         </div>
       )}
 

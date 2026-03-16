@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { BiasMeter } from "@/components/bias-meter";
 import { getBiasCoverage, hasBlindSpot } from "@/lib/bias/ratings";
@@ -23,9 +24,7 @@ export function StoryCard({ story, className }: StoryCardProps) {
   const blindSpot = hasBlindSpot(articles);
   const sourceCount = articles.length;
 
-  const imageUrl = story.imageUrl
-    ? `/api/image-proxy?url=${encodeURIComponent(story.imageUrl)}&w=400&q=75`
-    : null;
+  const imageUrl = story.imageUrl || null;
 
   return (
     <Link href={`/story/${story.id}`}>
@@ -37,12 +36,12 @@ export function StoryCard({ story, className }: StoryCardProps) {
       >
         {imageUrl && (
           <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={imageUrl}
               alt={story.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
         )}

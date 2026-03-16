@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pollAllSources } from "@/lib/ingestion/rss";
 
-export async function POST(request: NextRequest) {
-  // Protect with a shared secret
+export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
